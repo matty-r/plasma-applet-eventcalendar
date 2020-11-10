@@ -94,6 +94,10 @@ ConfigPage {
 
 	ConfigSection {
 		ConfigCheckBox {
+			configKey: 'agendaShowWeekNumber'
+			text: i18n("Show Week Number")
+		}
+		ConfigCheckBox {
 			configKey: 'agendaShowEventDescription'
 			text: i18n("Event description")
 		}

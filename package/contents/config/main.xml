@@ -187,6 +187,9 @@
 		<entry name="agendaEventSpacing" type="uint">
 			<default>10</default>
 		</entry>
+		<entry name="agendaShowWeekNumber" type="bool">
+			<default>false</default>
+		</entry>
 		<entry name="agendaShowEventDescription" type="bool">
 			<default>true</default>
 		</entry>

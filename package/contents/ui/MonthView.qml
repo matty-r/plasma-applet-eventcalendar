@@ -367,9 +367,6 @@ PinchArea {
 				var dateFormat, text
 				if (calendarBackend.displayedDate.getFullYear() == today.getFullYear()) {
 					if (showTodaysDate && calendarBackend.displayedDate.getMonth() == today.getMonth()) {
-						
-						
-
 						if ( !plasmoid.configuration.monthCurrentCustomTitleFormat ) {
 							dateFormat = i18nc("calendar title format for current month", "MMMM d, yyyy")
 						} else {
@@ -393,8 +390,6 @@ PinchArea {
 						dateFormat = plasmoid.configuration.monthOtherCustomTitleFormat
 					}
 				}
-
-				
 				text = Qt.formatDateTime(calendarBackend.displayedDate, dateFormat)
 				return text
 			}

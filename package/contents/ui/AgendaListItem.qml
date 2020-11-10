@@ -1,8 +1,9 @@
-import QtQuick 2.0
+import QtQuick 2.0 
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents3
+import org.kde.plasma.calendar 2.0
 
 import "Shared.js" as Shared
 import "../code/WeatherApi.js" as WeatherApi
@@ -15,16 +16,43 @@ GridLayout {
 	property var agendaItemTasks: model.tasks
 	property date agendaItemDate: model.date
 	property bool agendaItemIsToday: false
+	property var agendaItemWeek
+	
+	// https://github.com/KDE/plasma-framework/blob/master/src/declarativeimports/calendar/calendar.cpp
+	Calendar {
+		id: agendaCalendar
+
+		days: 7
+		weeks: 6
+		firstDayOfWeek: {
+			if (plasmoid.configuration.firstDayOfWeek == -1) {
+				return Qt.locale().firstDayOfWeek
+			} else {
+				return plasmoid.configuration.firstDayOfWeek
+			}
+		}
+
+	}
+	
 	function checkIfToday() {
 		agendaItemIsToday = timeModel.currentTime && model.date ? Shared.isSameDate(timeModel.currentTime, model.date) : false
 		// console.log('checkIfToday()', agendaListItem.agendaItemIsToday, timeModel.currentTime, model.date)
+		agendaCalendar.displayedDate = model.date
+		var columns = agendaCalendar.days
+		var rowNumber = Math.floor(index / columns)
+		var week = 1 + agendaCalendar.weeksModel[rowNumber]
+		agendaItemWeek = week
+		console.log(agendaCalendar.displayedDate + "===========================================" + agendaItemWeek)
 	}
+
 	Component.onCompleted: agendaListItem.checkIfToday()
+
 	Connections {
 		target: timeModel
 		onLoaded: agendaListItem.checkIfToday()
 		onDateChanged: agendaListItem.checkIfToday()
 	}
+
 	property bool agendaItemInProgress: agendaItemIsToday
 	property bool weatherOnRight: plasmoid.configuration.agendaWeatherOnRight
 	property alias tasksRepeater: tasksRepeater
@@ -38,6 +66,7 @@ GridLayout {
 			}
 		}
 	}
+
 	function reset() {
 		newEventForm.active = false
 		agendaListItem.checkIfToday()
@@ -146,7 +175,7 @@ GridLayout {
 
 			PlasmaComponents3.Label {
 				id: itemDay
-				text: Qt.formatDateTime(date, i18nc("agenda date format line 2", "ddd"))
+				text: Qt.formatDateTime(date, i18nc("agenda date format line 2", "ddd")) + " w" + agendaItemWeek
 				color: agendaItemIsToday ? inProgressColor : PlasmaCore.ColorScope.textColor
 				opacity: agendaItemIsToday ? 1 : 0.5
 				font.pointSize: -1
