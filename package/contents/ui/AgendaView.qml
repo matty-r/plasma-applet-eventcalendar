@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 3.0 as PlasmaComponents3
 
 import "Shared.js" as Shared
 import "LocaleFuncs.js" as LocaleFuncs
@@ -49,9 +50,30 @@ Item {
 		}
 	}
 
+	GridLayout {
+		width: agendaScrollView.viewportWidth
+		height: 20
+		
+		PlasmaComponents3.Label {
+			id: agendaViewWeekLabel
+			text: "week"
+			horizontalAlignment: Text.AlignLeft
+			Layout.alignment: Qt.AlignVCenter
+		}
+
+		Rectangle {
+			color: "red"
+			opacity: agendaItemIsToday ? 1 : 0.5
+			Layout.fillHeight: true
+			Layout.fillWidth: true
+			Layout.alignment: Qt.AlignVCenter
+		}
+	}
+
 	ScrollView {
 		id: agendaScrollView
 		anchors.fill: parent
+		y: 100
 		// clip: true
 		readonly property int contentWidth: contentItem ? contentItem.width : width
 		readonly property int contentHeight: contentItem ? contentItem.height : 0 // Warning: Binding loop
@@ -60,6 +82,12 @@ Item {
 		readonly property int scrollY: flickableItem ? flickableItem.contentY : 0
 
 		// onScrollYChanged: console.log('scrollY', scrollY)
+		onScrollYChanged: {
+			//console.log('scrollY', scrollY)
+			//var currentItem = getCurrentAgendaItem()
+			//currentItem.agendaItemShowWeekOverride = true
+			agendaViewWeekLabel.text = getCurrentAgendaItem().agendaItemDate
+		}
 
 		ColumnLayout {
 			id: agendaColumn
@@ -73,6 +101,7 @@ Item {
 				// onPopulatedChanged: console.log(Date.now(), 'agendaRepeater.populated', populated)
 				model: root.agendaModel
 				delegate: AgendaListItem {
+					
 					// visible: agendaRepeater.populated
 					width: parent.width
 					// onHeightChanged: {
@@ -106,7 +135,8 @@ Item {
 				for (var i = 0; i < agendaRepeater.count; i++) {
 					var agendaListItem = agendaRepeater.itemAt(i)
 					offsetY += agendaListItem ? agendaListItem.height : 0
-					// console.log('\t', i, agendaListItem, agendaListItem.height)
+					
+					//console.log('\t', i, agendaListItem, agendaListItem.height)
 					if (i != agendaRepeater.count-1) {
 						offsetY += agendaColumn.spacing
 					}
@@ -120,16 +150,16 @@ Item {
 		}
 
 		function getItemOffsetY(index) {
-			// console.log('getItemOffsetY', index)
+			console.log('getItemOffsetY', index)
 			if (index <= 0) {
 				return 0
 			} else if (index < agendaRepeater.count) {
-				// console.log('\t', index < agendaRepeater.count)
+				console.log('\t', index < agendaRepeater.count)
 				var offsetY = 0
 				for (var i = 0; i < Math.min(index, agendaRepeater.count); i++) {
 					var agendaListItem = agendaRepeater.itemAt(i)
 					offsetY += agendaListItem ? agendaListItem.height : 0
-					// console.log('\t', i, agendaListItem, agendaListItem.height)
+					console.log('\t', i, agendaListItem, agendaListItem.height)
 					if (i != agendaRepeater.count-1) {
 						offsetY += agendaColumn.spacing
 					}
@@ -139,6 +169,8 @@ Item {
 				return agendaScrollView.contentHeight
 			}
 		}
+
+
 
 		function scrollToY(offsetY) {
 			flickableItem.contentY = Math.min(offsetY, contentHeight-viewportHeight)
@@ -152,6 +184,8 @@ Item {
 			var offsetY = getItemOffsetY(i)
 			scrollToY(offsetY)
 		}
+
+
 
 		function positionViewAtEvent(agendaItemIndex, eventIndex) {
 			var offsetY = getItemOffsetY(agendaItemIndex)

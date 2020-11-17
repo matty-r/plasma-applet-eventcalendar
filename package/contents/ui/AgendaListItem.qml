@@ -3,46 +3,24 @@ import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents3
-import org.kde.plasma.calendar 2.0
-
-import "Shared.js" as Shared
-import "../code/WeatherApi.js" as WeatherApi
 
 GridLayout {
 	id: agendaListItem
 	readonly property int agendaItemIndex: index
+	rows: 5
+	columns: 3
 	columnSpacing: 0
 	property var agendaItemEvents: model.events
 	property var agendaItemTasks: model.tasks
 	property date agendaItemDate: model.date
 	property bool agendaItemIsToday: false
-	property var agendaItemWeek
-	
-	// https://github.com/KDE/plasma-framework/blob/master/src/declarativeimports/calendar/calendar.cpp
-	Calendar {
-		id: agendaCalendar
+	property var agendaItemWeek: model.week
+	property bool agendaItemShowWeekOverride: false
 
-		days: 7
-		weeks: 6
-		firstDayOfWeek: {
-			if (plasmoid.configuration.firstDayOfWeek == -1) {
-				return Qt.locale().firstDayOfWeek
-			} else {
-				return plasmoid.configuration.firstDayOfWeek
-			}
-		}
 
-	}
-	
 	function checkIfToday() {
-		agendaItemIsToday = timeModel.currentTime && model.date ? Shared.isSameDate(timeModel.currentTime, model.date) : false
+		// agendaItemIsToday = timeModel.currentTime && model.date ? Shared.isSameDate(timeModel.currentTime, model.date) : false
 		// console.log('checkIfToday()', agendaListItem.agendaItemIsToday, timeModel.currentTime, model.date)
-		agendaCalendar.displayedDate = model.date
-		var columns = agendaCalendar.days
-		var rowNumber = Math.floor(index / columns)
-		var week = 1 + agendaCalendar.weeksModel[rowNumber]
-		agendaItemWeek = week
-		console.log(agendaCalendar.displayedDate + "===========================================" + agendaItemWeek)
 	}
 
 	Component.onCompleted: agendaListItem.checkIfToday()
@@ -80,7 +58,7 @@ GridLayout {
 	LinkRect {
 		visible: agendaModel.showDailyWeather
 		Layout.alignment: Qt.AlignTop
-		Layout.column: weatherOnRight ? 2 : 0
+		//Layout.column: weatherOnRight ? 2 : 0
 		Layout.minimumWidth: appletConfig.agendaDateColumnWidth
 		implicitWidth: itemWeatherColumn.implicitWidth
 		onWidthChanged: {
@@ -147,7 +125,7 @@ GridLayout {
 
 	LinkRect {
 		Layout.alignment: Qt.AlignTop
-		Layout.column: weatherOnRight ? 0 : 1
+		//Layout.column: weatherOnRight ? 0 : 1
 		implicitWidth: appletConfig.agendaDateColumnWidth
 
 		// readonly property int maxOffset: agendaListItem.height - height
@@ -160,6 +138,21 @@ GridLayout {
 			anchors.leftMargin: appletConfig.agendaColumnSpacing
 			anchors.rightMargin: appletConfig.agendaColumnSpacing
 			spacing: 0
+
+			PlasmaComponents3.Label {
+				id: itemWeek
+				text: agendaItemWeek
+				color: agendaItemIsToday ? inProgressColor : PlasmaCore.ColorScope.textColor
+				visible: agendaItemDate.getDay() == 0 ? (!newEventForm.visible || agendaItemShowWeekOverride) : false
+				opacity: agendaItemIsToday ? 1 : 0.5
+				font.pointSize: -1
+				font.pixelSize: appletConfig.agendaFontSize
+				font.weight: agendaItemIsToday ? inProgressFontWeight : Font.Normal
+				//Layout.alignment: Qt.AlignHCenter
+				Layout.fillWidth: true
+				horizontalAlignment: Text.AlignRight
+				verticalAlignment: Text.AlignTop
+			}
 
 			PlasmaComponents3.Label {
 				id: itemDate
@@ -175,7 +168,7 @@ GridLayout {
 
 			PlasmaComponents3.Label {
 				id: itemDay
-				text: Qt.formatDateTime(date, i18nc("agenda date format line 2", "ddd")) + " w" + agendaItemWeek
+				text: Qt.formatDateTime(date, i18nc("agenda date format line 2", "ddd"))
 				color: agendaItemIsToday ? inProgressColor : PlasmaCore.ColorScope.textColor
 				opacity: agendaItemIsToday ? 1 : 0.5
 				font.pointSize: -1
@@ -200,8 +193,20 @@ GridLayout {
 
 	ColumnLayout {
 		Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-		Layout.column: weatherOnRight ? 1 : 2
+		//Layout.column: weatherOnRight ? 1 : 2
 		spacing: appletConfig.agendaEventSpacing
+
+		ColumnLayout {
+			visible: agendaItemDate.getDay() == 0 ? (!newEventForm.visible || agendaItemShowWeekOverride) : false
+
+			Rectangle {
+				color: agendaItemIsToday ? inProgressColor : PlasmaCore.ColorScope.textColor
+				opacity: agendaItemIsToday ? 1 : 0.5
+				height: 1
+				Layout.fillWidth: true
+				Layout.alignment: Qt.AlignVCenter
+			}
+		}
 
 		NewEventForm {
 			id: newEventForm

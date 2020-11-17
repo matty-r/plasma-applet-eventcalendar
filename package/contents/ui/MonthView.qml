@@ -240,6 +240,7 @@ PinchArea {
 			})
 		}
 
+
 		onTodayChanged: {
 			logger.debug('onTodayChanged', displayedDate, today)
 			displayedDate = today

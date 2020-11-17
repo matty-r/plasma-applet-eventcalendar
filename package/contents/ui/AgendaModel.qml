@@ -67,6 +67,7 @@ ListModel {
 			date: new Date(dateTime),
 			events: [],
 			tasks: [],
+			week: "w46",
 			showWeather: false,
 			tempLow: 0,
 			tempHigh: 0,
